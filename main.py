@@ -1,15 +1,18 @@
-from flask import Flask, render_template,url_for
+from flask import Flask, render_template,url_for,redirect
 from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text,Date,Float
 from datetime import datetime
-
+from forms import  RegisterForm, LoginForm
 app = Flask(__name__)
 bootstrap = Bootstrap5(app)
 class Base(DeclarativeBase):
     pass
+
+app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///spensly.db'
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
@@ -30,10 +33,51 @@ class Expense():
     date: Mapped[str] = mapped_column(Date, nullable=False)
 
 
+@app.route('/register')
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+
+        #need to salt or hash pass
+        hash_and_salted_password = generate_password_hash(
+            form.password.data,
+            method='pbkdf2:sha256',
+            salt_length=8
+        )
+        new_user = User(
+            email=form.email.data,
+            name=form.name.data,
+            password=hash_and_salted_password,
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        login_user(new_user)
+        return redirect #redirect to home page for this specific user
+    return render_template("register.html", form=form, current_user=current_user)
 
 
 
 
+
+
+
+@app.route('/login')
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+
+        passw = form.password.data
+        result = db.session.execute(db.select(User).where(User.email == form.email.data))
+        user = result.scalar()
+        if not user:
+            flash("The email doest exist,try again bro!!")
+            return redirect(url_for('login'))
+        # elif not #for password correct or wrong
+
+        else:
+            login_user(user)
+            return redirect('home')
+    return render_template("login.html",form=form,current_user=current_user)
 
 
 
