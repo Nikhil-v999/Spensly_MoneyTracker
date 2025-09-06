@@ -233,6 +233,18 @@ mark, .mark {
   padding: 0.1875em;
   background-color: var(--bs-highlight-bg);
 }
+.transactions-table  td:nth-child(3) {
+  max-width: 200px;
+  white-space: nowrap;    /* keep it in one line */
+  overflow: hidden;       /* hide overflow */
+  text-overflow: ellipsis; /* show "..." when too long */
+}
+
+/* optional: show full text on hover */
+.transactions-table td:nth-child(3):hover {
+  white-space: normal;
+  overflow: visible;
+}
 
 sub,
 sup {

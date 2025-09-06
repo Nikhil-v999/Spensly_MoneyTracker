@@ -1,7 +1,7 @@
 {% include "header.html" %}
 
 {% block title %}Dashboard{% endblock %}
-
+{% from "bootstrap5/form.html" import render_form %}
 {% block content %}
 <br>
 <br>
@@ -45,7 +45,13 @@
             </div>
         </div>
     </div>
-
+{% with messages = get_flashed_messages() %}
+      {% if messages %}
+      {% for message in messages %}
+      <p class="flash">{{ message }}</p>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
     <!-- Quick Add Form & Recent Transactions Row -->
     <div class="row">
         <!-- Quick Add Form Column -->
@@ -56,45 +62,50 @@
                 </div>
                 <div class="card-body">
                 <!--form is there for details -->
-                    <form>
-                        <div class="mb-3">
-                            <label for="amount" class="form-label">Amount</label>
-                            <input type="number" step="0.01" class="form-control" id="amount" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <input type="text" class="form-control" id="description">
-                        </div>
-                        <div class="mb-3">
-                            <label for="category" class="form-label">Category</label>
-                            <select class="form-select" id="category">
-                                <option selected>Choose...</option>
-                                <option value="1">Food & Dining</option>
-                                <option value="2">Transportation</option>
-                                <option value="3">Entertainment</option>
-                                <option value="4">Personal Care</option>
-                                <option value="5">Clothing</option>
-                                <option value="6">Other</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add Expense</button>
-                    </form>
+                     {{render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+
                 </div>
             </div>
         </div>
 
         <!-- Recent Transactions Column -->
         <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Recent Transactions</h5>
-                </div>
-                <div class="card-body">
-                    <p>No transactions yet. Add your first expense!</p>
-                    <!-- We will add a table here later -->
-                </div>
-            </div>
+    <div class="card">
+        <div class="card-header">
+            <h5>Recent Transactions</h5>
         </div>
+        <div class="card-body">
+            {% if expenses %}
+                <table class="table table-striped transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th class="text-end">Amount</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.date.strftime("%d-%m-%Y") }}</td>
+                            <td>{{ expense.category }}</td>
+                            <td>{{ expense.description or "-" }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(expense.amount) }}</td>
+                            <td><a href="{{ url_for('delete_expense', expense_id=expense.id) }}" onclick="return confirm('Are you sure you want to delete this expense?');">Delete</a>
+</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No transactions yet. Add your first expense!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
     </div>
 </div>
 {% endblock %}
