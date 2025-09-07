@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import Integer, String, Text,Date,Float
+from sqlalchemy import Integer, String, Text,Date,Float,func,extract
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import  RegisterForm, LoginForm,ExpenseForm
@@ -91,14 +91,21 @@ def login():
         passw = form.password.data
         result = db.session.execute(db.select(User).where(User.email == form.email.data))
         user = result.scalar()
-        if not user:
-            flash("The email doest exist,try again bro!!")
-            return redirect(url_for('login'))
-        # elif not #for password correct or wrong
 
+        if not user:
+            flash("That email does not exist. Please try again.")
+            return redirect(url_for('login'))
+
+        elif not check_password_hash(user.password, passw):
+            flash("Password incorrect. Please try again.")
+            return redirect(url_for('login'))
         else:
             login_user(user)
             return redirect(url_for('home'))
+
+
+
+
     return render_template("login.html",form=form,current_user=current_user)
 
 
@@ -121,6 +128,42 @@ def dashboard():
 
 
     form = ExpenseForm()
+    now = datetime.now()
+    current_month = now.month
+    current_year = now.year
+
+    # Query: Total Spent for the current month
+    total_this_month_result = db.session.query(
+        func.sum(Expense.amount).label('total')
+    ).filter(
+        Expense.user_id == current_user.id,
+        extract('month', Expense.date) == current_month,
+        extract('year', Expense.date) == current_year
+    ).scalar()
+    total_this_month = total_this_month_result if total_this_month_result else 0.0
+
+    # Query: Total Number of Transactions (for all time or this month)
+    total_transactions_result = db.session.query(
+        func.count(Expense.id).label('count')
+    ).filter(
+        Expense.user_id == current_user.id,
+        extract('month', Expense.date) == current_month,
+        extract('year', Expense.date) == current_year
+    ).scalar()
+    total_transactions = total_transactions_result if total_transactions_result else 0
+
+    # Query: Top Category (for current month)
+    top_category_result = db.session.query(
+        Expense.category,
+        func.sum(Expense.amount).label('total')
+    ).filter(
+        Expense.user_id == current_user.id,
+        extract('month', Expense.date) == current_month,
+        extract('year', Expense.date) == current_year
+    ).group_by(Expense.category).order_by(func.sum(Expense.amount).desc()).first()
+
+    top_category = top_category_result[0] if top_category_result else "N/A"
+    top_category_amount = top_category_result[1] if top_category_result else 0
     if form.validate_on_submit():
         new_expense = Expense(
             amount=form.amount.data,
@@ -139,7 +182,13 @@ def dashboard():
                 .order_by(Expense.date.desc(), Expense.id.desc())
                 .all())
 
-    return render_template("dashboard.html", form=form, expenses=expenses)
+    return render_template("dashboard.html",
+                           form=form,
+                           expenses=expenses,
+                           total_this_month=total_this_month,
+                           total_transactions=total_transactions,
+                           top_category=top_category,
+                           top_category_amount=top_category_amount)
 
 
 @app.route("/delete/<int:expense_id>")
@@ -152,14 +201,32 @@ def delete_expense(expense_id):
     return redirect(url_for('dashboard'))
 
 
-@app.route("/edit/<int:expense_id>")
+
+
+
+@app.route("/edit/<int:expense_id>", methods=["GET", "POST"])
 @login_required
 def edit_expense(expense_id):
-    expense_to_edit = Expense.query.filter_by(id=expense_id, user_id=current_user.id).first_or_404()
-    db.session.delete(expense_to_delete)
-    db.session.commit()
-    flash("Expense edited successfully!", "success")
-    return redirect(url_for('dashboard'))
+    expense = Expense.query.filter_by(id=expense_id, user_id=current_user.id).first_or_404()
+    form = ExpenseForm(obj=expense)  # pre-fill form with expense data
+
+    if form.validate_on_submit():
+        expense.category = form.category.data
+        expense.description = form.description.data
+        expense.amount = form.amount.data
+        expense.date = form.date.data
+        db.session.commit()
+        flash("Expense updated successfully!", "success")
+        return redirect(url_for("dashboard"))
+
+    return render_template("edit_expense.html", form=form)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
 if __name__ == "__main__":
     app.run(debug=True)
