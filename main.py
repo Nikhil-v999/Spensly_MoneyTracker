@@ -7,13 +7,22 @@ from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text,Date,Float,func,extract
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from forms import  RegisterForm, LoginForm,ExpenseForm
+from forms import  RegisterForm, LoginForm,ExpenseForm         #import from other file(forms.py)
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+
+
+
 app = Flask(__name__)
 bootstrap = Bootstrap5(app)
 class Base(DeclarativeBase):
     pass
 
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 login_manager = LoginManager()
 login_manager.init_app(app)
 @login_manager.user_loader
@@ -59,6 +68,12 @@ with app.app_context():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+
+        #check for already registered users
+        existing_user = db.session.execute(db.select(User).where(User.email == form.email.data)).scalar()
+        if existing_user :
+            flash('Account Already exits!!,Please Login')
+            return redirect(url_for('login'))
 
         #need to salt or hash pass
         hash_and_salted_password = generate_password_hash(
@@ -107,13 +122,6 @@ def login():
 
 
     return render_template("login.html",form=form,current_user=current_user)
-
-
-
-
-
-
-
 
 
 
@@ -177,14 +185,23 @@ def dashboard():
         flash("Expense added successfully!", "success")
         return redirect(url_for("dashboard"))
 
-    expenses = (Expense.query
+    expenses = (
+                Expense.query
                 .filter_by(user_id=current_user.id)
                 .order_by(Expense.date.desc(), Expense.id.desc())
-                .all())
-
+                .limit(10)              #limitng no.of trans to be shown
+                .all()
+                )
+    all_expenses = (
+                Expense.query
+                .filter_by(user_id=current_user.id)
+                .order_by(Expense.date.desc(), Expense.id.desc())
+                .all()
+                )
     return render_template("dashboard.html",
                            form=form,
                            expenses=expenses,
+                           all_expenses = all_expenses,
                            total_this_month=total_this_month,
                            total_transactions=total_transactions,
                            top_category=top_category,
@@ -194,7 +211,7 @@ def dashboard():
 @app.route("/delete/<int:expense_id>")
 @login_required
 def delete_expense(expense_id):
-    expense_to_delete = Expense.query.filter_by(id=expense_id, user_id=current_user.id).first_or_404()
+    expense_to_delete = Expense.query.filter_by(id=expense_id, user_id=current_user.id).first_or_404() #when user may change in link website like /15 -> /5
     db.session.delete(expense_to_delete)
     db.session.commit()
     flash("Expense deleted successfully!", "success")
