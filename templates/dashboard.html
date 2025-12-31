@@ -9,7 +9,7 @@
 <br>
 <br>
 <br>
-<div class="container mt-5">
+  <div class="container mt-5">
     <div class="row">
         <div class="col-12">
             <!-- Welcome Message -->
@@ -19,76 +19,134 @@
     </div>
 
     <!-- Summary Bar -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Total Spent This Month</h5>
-                    <p class="card-text display-6">{{total_this_month}}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Top Category-Amount</h5>
-                    <p class="card-text display-6">{{top_category}}-₹{{top_category_amount}}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">Transactions</h5>
-                    <p class="card-text display-6">{{total_transactions}}</p>
-                </div>
-            </div>
-        </div>
+    <div class="row g-4 mb-5">
+
+  <!-- Total Spent -->
+  <div class="col-md-4">
+    <div class="insight-tile">
+      <div class="insight-icon spent">
+        <i class="fas fa-wallet"></i>
+      </div>
+      <div class="insight-content">
+        <p class="insight-label">Total Spent This Month</p>
+        <h3 class="insight-value">₹{{ total_this_month }}</h3>
+      </div>
     </div>
+  </div>
 
+  <!-- Top Category -->
+  <div class="col-md-4">
+    <div class="insight-tile">
+      <div class="insight-icon category">
+        <i class="fas fa-utensils"></i>
+      </div>
+      <div class="insight-content">
+        <p class="insight-label">Top Category</p>
+        <h3 class="insight-value">
+          {{ top_category }}<br>
+          <span class="sub-value">₹{{ top_category_amount }}</span>
+        </h3>
+      </div>
+    </div>
+  </div>
 
+  <!-- Transactions -->
+  <div class="col-md-4">
+    <div class="insight-tile">
+      <div class="insight-icon count">
+        <i class="fas fa-list"></i>
+      </div>
+      <div class="insight-content">
+        <p class="insight-label">Transactions</p>
+        <h3 class="insight-value">{{ total_transactions }}</h3>
+      </div>
+    </div>
+  </div>
 
-    <section class="page-section " id="portfolio">
-            <div class="container">
-
-                <div class="row">
-                    <div class="col-lg-4 col-sm-6 mb-4">
-                        <!-- Portfolio item 1-->
-                            <div class="portfolio-item">
-                                <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal1">
-                                <div class="portfolio-hover">
-                                    <div class="portfolio-hover-content"><i class="fas fa-plus fa-3x"></i></div>
-                                </div>
-                                <img class="img-fluid" src="./static/assets/img/portfolio/10.jpg" alt="..." />
-                            </a>
-<!--                            <div class="portfolio-caption">-->
-<!--                                <div class="portfolio-caption-heading">Threads</div>-->
-<!--                                <div class="portfolio-caption-subheading text-muted">Illustration</div>-->
-<!--                            </div>-->
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-sm-6 mb-4">
-                        <!-- Portfolio item 2-->
-                            <div class="portfolio-item">
-                                <a class="portfolio-link" data-bs-toggle="modal" href="#portfolioModal2">
-                                <div class="portfolio-hover">
-                                    <div class="portfolio-hover-content"><i class="fas fa-history fa-3x"></i>
 </div>
-                                </div>
-                                <img class="img-fluid" src="./static/assets/img/portfolio/10.jpg" alt="..." />
-                            </a>
-<!--                            <div class="portfolio-caption">-->
-<!--                                <div class="portfolio-caption-heading">Threads</div>-->
-<!--                                <div class="portfolio-caption-subheading text-muted">Illustration</div>-->
-<!--                            </div>-->
-                        </div>
-                    </div>
 
 
-                </div>
-            </div>
-    </section>
+
+    <div class="row justify-content-center g-4">
+
+  <div class="col-lg-4">
+    <div class="action-tile" data-bs-toggle="modal" href="#portfolioModal1">
+      <div class="action-icon add">
+        <i class="fas fa-plus"></i>
+      </div>
+      <div class="action-content">
+        <h5>Add Expense</h5>
+        <p>Log a new transaction</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <a class="action-tile" href="{{url_for('view_trans')}}">
+      <div class="action-icon view">
+        <i class="fas fa-list"></i>
+      </div>
+      <div class="action-content">
+        <h5>View All Transactions</h5>
+        <p>See your spending history</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="action-tile">
+      <div class="action-icon analyze">
+        <i class="fas fa-chart-pie"></i>
+      </div>
+      <div class="action-content">
+        <h5>Analysis</h5>
+        <p>Understand your spending</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="mb-4"></div>
+
+<!--<div class="row justify-content-center text-center g-4">-->
+
+<!--  &lt;!&ndash; Item 1 &ndash;&gt;-->
+<!--  <div class="col-lg-4 col-md-6">-->
+<!--    <a class="action-card" data-bs-toggle="modal" href="#portfolioModal1">-->
+<!--      <img src="./static/assets/img/portfolio/10.jpg" alt="Add Expense">-->
+<!--      <p class="action-text">Add Expense</p>-->
+<!--    </a>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Item 2 &ndash;&gt;-->
+<!--  <div class="col-lg-4 col-md-6">-->
+<!--    <a class="action-card" data-bs-toggle="modal" href="#portfolioModal2">-->
+<!--      <img src="./static/assets/img/portfolio/10.jpg" alt="View Transactions">-->
+<!--      <p class="action-text">View All Transactions</p>-->
+<!--    </a>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Item 3 &ndash;&gt;-->
+<!--  <div class="col-lg-4 col-md-6">-->
+<!--    <a class="action-card" href="#">-->
+<!--      <img src="./static/assets/img/portfolio/10.jpg" alt="Analysis">-->
+<!--      <p class="action-text">Analysis</p>-->
+<!--    </a>-->
+<!--  </div>-->
+
+<!--</div>-->
+
+
+
+
+
+
+
+
+
+
+
+
 
 {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -222,6 +280,47 @@
                         <div class="row justify-content-center">
                             <div class="col-lg-8">
                                 <div class="modal-body">
+                                        <form method="GET" class="row g-3 mb-3">
+
+                                          <div class="col-md-3">
+                                              <h5><u>Categories</u></h5>
+                                            <select name="category" class="form-select">
+                                              <option value="">All Categories</option>
+                                              <option value="Food & Dining">Food & Dining</option>
+                                              <option value="Transportation">Transportation</option>
+                                              <option value="Entertainment">Entertainment</option>
+                                                <option value="Personal Care">Personal Care</option>
+                                                <option value="Clothing">Clothing</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                          </div>
+
+                                          <div class="col-md-3">
+                                              <h5><u>Start Date</u></h5>
+                                            <input type="date" name="start_date" class="form-control">
+                                          </div>
+
+                                          <div class="col-md-3">
+                                              <h5><u>End Date</u></h5>
+                                            <input type="date" name="end_date" class="form-control">
+                                          </div>
+
+                                          <div class="col-md-3">
+                                              <h5><u>Sort By:</u></h5>
+                                            <select name="sort" class="form-select">
+                                              <option value="date_desc">Newest First</option>
+                                              <option value="date_asc">Oldest First</option>
+                                              <option value="amount_desc">Amount: High → Low</option>
+                                              <option value="amount_asc">Amount: Low → High</option>
+                                            </select>
+                                          </div>
+
+                                          <div class="col-12 text-end">
+                                            <button class="btn btn-dark btn-sm">Apply</button>
+                                          </div>
+
+                                        </form>
+
                                     <!-- Project details-->
 <!--                                    <h2 class="text-uppercase">Project Name</h2>-->
 <!--                                    <p class="item-intro text-muted">Lorem ipsum dolor sit amet consectetur.</p>-->

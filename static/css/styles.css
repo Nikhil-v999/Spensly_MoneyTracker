@@ -11331,3 +11331,149 @@ section#contact form#contactForm :-ms-input-placeholder {
   font-size: 0.9rem;
   font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
+
+
+.action-tile {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e6e6e6;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.action-tile:hover {
+    transform: translateY(-9px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+
+}
+
+/* Icon */
+.action-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #ffffff;
+}
+
+/* Color variants */
+.action-icon.add {
+    background: #2ecc71;
+}
+
+.action-icon.view {
+    background: #3498db;
+}
+
+.action-icon.analyze {
+    background: #9b59b6;
+}
+
+/* Text */
+.action-content h5 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.action-content p {
+    margin: 2px 0 0;
+    font-size: 0.9rem;
+    color: #6b6b6b;
+}
+
+/* For viewing ones */
+/* Bigger Insight tiles */
+.insight-tile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 28px 26px;          /* ⬅ increased */
+    background: #ffffff;
+    border-radius: 18px;         /* ⬅ slightly rounder */
+    border: 1px solid #eaeaea;
+    min-height: 110px;           /* ⬅ ensures visual parity */
+    transition: all 0.25s ease;
+}
+
+.insight-tile:hover {
+    transform: translateY(-9px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
+    background-color : #b8f5ed
+}
+
+/* Bigger icon */
+.insight-icon {
+    width: 56px;                 /* ⬅ increased */
+    height: 56px;
+    font-size: 1.4rem;
+}
+
+/* Text sizing */
+.insight-label {
+    font-size: 0.95rem;          /* ⬅ increased */
+}
+
+.insight-value {
+    font-size: 1.7rem;           /* ⬅ main visual weight */
+}
+
+.sub-value {
+    font-size: 1.1rem;
+}
+
+
+.action-tile {
+    display: flex;
+    text-decoration: none;
+    color: inherit;
+}
+.card {
+  border-radius: 14px;
+}
+
+.table th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.btn-outline-danger {
+  border-color: #f5c2c7;
+}
+.table td {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.badge {
+  font-weight: 500;
+  border-radius: 6px;
+}
+.transactions-table {
+  table-layout: fixed;
+  width: 100%;
+}
+.description-cell {
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* 🔥 THIS is the fix */
+  word-break: break-all;
+}
+
+.description-cell:hover {
+  white-space: normal;
+  background: #f8f9fa;
+  position: relative;
+  z-index: 2;
+}

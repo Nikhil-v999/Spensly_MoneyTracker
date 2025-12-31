@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template,url_for,redirect,flash
+from flask import Flask, render_template,url_for,redirect,flash,request
 from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_sqlalchemy import SQLAlchemy
@@ -44,7 +44,7 @@ class Expense(db.Model):
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True)
     category: Mapped[str] = mapped_column(String(50), nullable=False)
-    date: Mapped[str] = mapped_column(Date, nullable=False)
+    date: Mapped[date] = mapped_column(Date, nullable=False)
 
     user_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("users.id"))
 
@@ -183,7 +183,7 @@ def dashboard():
         db.session.add(new_expense)
         db.session.commit()
         flash("Expense added successfully!", "success")
-        return redirect(url_for("dashboard"))
+        #return redirect(url_for("dashboard"))
 
     expenses = (
                 Expense.query
@@ -192,16 +192,16 @@ def dashboard():
                 .limit(10)              #limitng no.of trans to be shown
                 .all()
                 )
-    all_expenses = (
-                Expense.query
-                .filter_by(user_id=current_user.id)
-                .order_by(Expense.date.desc(), Expense.id.desc())
-                .all()
-                )
+    # all_expenses = (
+    #             Expense.query
+    #             .filter_by(user_id=current_user.id)
+    #             .order_by(Expense.date.desc(), Expense.id.desc())
+    #             .all()
+    #             )
     return render_template("dashboard.html",
                            form=form,
                            expenses=expenses,
-                           all_expenses = all_expenses,
+
                            total_this_month=total_this_month,
                            total_transactions=total_transactions,
                            top_category=top_category,
@@ -215,7 +215,7 @@ def delete_expense(expense_id):
     db.session.delete(expense_to_delete)
     db.session.commit()
     flash("Expense deleted successfully!", "success")
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('view_trans'))
 
 
 
@@ -234,9 +234,55 @@ def edit_expense(expense_id):
         expense.date = form.date.data
         db.session.commit()
         flash("Expense updated successfully!", "success")
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("view_trans"))
 
     return render_template("edit_expense.html", form=form)
+
+
+
+@app.route("/transactions", methods=["GET"])
+@login_required
+def view_trans():
+
+    category = request.args.get("category")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    sort = request.args.get("sort")
+
+    query = Expense.query.filter(
+        Expense.user_id == current_user.id
+    )
+
+    if category:
+        query = query.filter(Expense.category == category)
+
+    if start_date:
+        query = query.filter(Expense.date >= start_date)
+
+    if end_date:
+        query = query.filter(Expense.date <= end_date)
+
+    if sort == "date_asc":
+        query = query.filter(Expense.date.asc(), Expense.id.asc())
+
+    elif sort == "date_desc":
+        query = query.filter(Expense.date.desc(), Expense.id.desc())
+
+    elif sort == "amount_asc":
+        query = query.filter(Expense.amount.asc(), Expense.id.desc())
+
+    elif sort == "amount_desc":
+        query = query.filter(Expense.amount.desc(), Expense.id.desc())
+
+    else:
+        query = query.order_by(Expense.date.desc(), Expense.id.desc())
+
+    all_expenses = query.all()
+
+    return render_template(
+        "transactions.html",
+        all_expenses=all_expenses
+    )
 
 
 @app.route('/logout')
