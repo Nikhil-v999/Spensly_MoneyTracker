@@ -11477,3 +11477,46 @@ section#contact form#contactForm :-ms-input-placeholder {
   position: relative;
   z-index: 2;
 }
+.back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  text-decoration: none;
+
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.back-btn:hover {
+  background-color: #f1f3f5;
+  transform: translateX(-2px);
+  color: #212529;
+}
+.back-btn {
+  width: 40px;
+  height: 40px;
+}
+
+.back-btn i {
+  font-size: 20px;
+}
+
+.dashboard-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-9px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+   background-color : #b8f5ed
+}
+.progress-bar {
+  min-width: 35px;
+}
+
+.oty:hover {
+    transform: translateY(-9px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
+    background-color : #b8f5ed
+}

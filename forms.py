@@ -37,3 +37,11 @@ class ExpenseForm(FlaskForm):
                            validators=[DataRequired()])
 
     submit = SubmitField("Add Expense")
+
+
+class BudgetForm(FlaskForm):
+    amount = DecimalField("Amount",
+                          places=2,
+                          validators=[DataRequired()],
+                          render_kw={"step": "0.01"})
+    submit = SubmitField("Set Monthly Budget")
