@@ -1,0 +1,700 @@
+{% include "header.html" %}
+{% from "bootstrap5/form.html" import render_form %}
+<div class="container my-5 pt-4"></div>
+<!-- Month / Year Selector -->
+
+<div class="container  pt-4" style="margin-top: 25px; margin-bottom: 25px;">
+
+  <div class="monthly-overview-box">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">Monthly Overview</h2>
+    </div>
+
+    <!-- Month Selector -->
+    <form method="GET" class="mb-4">
+      <input type="hidden" name="month1"
+       value="{{ selected_m1_year }}-{{ '%02d'|format(selected_m1_month) }}">
+
+<input type="hidden" name="month2"
+       value="{{ selected_m2_year }}-{{ '%02d'|format(selected_m2_month) }}">
+{% if cat_selected %}
+<input type="hidden" name="category" value="{{ cat_selected }}">
+{% endif %}
+
+{% if cat_year and cat_month %}
+<input type="hidden" name="cat_month"
+       value="{{ cat_year }}-{{ '%02d'|format(cat_month) }}">
+{% endif %}
+      <div class="row align-items-end g-2">
+        <div class="col-md-3">
+          <label class="form-label small text-muted">Select Month</label>
+          <input
+            type="month"
+            name="month"
+            class="form-control"
+            value="{{ selected_year }}-{{ '%02d'|format(selected_month) }}">
+        </div>
+
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-dark w-100">
+            Apply
+          </button>
+        </div>
+      </div>
+    </form>
+<!-- SUMMARY CARDS -->
+<div class="row g-4 mb-5">
+  <!-- Total Spent -->
+        <div class="col-md-4">
+            <div class="insight-tile">
+                <div class="insight-icon spent">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="insight-content">
+                    <p class="insight-label">Total Spent This Month</p>
+                    <h3 class="insight-value">₹{{ total_this_month }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Category -->
+        <div class="col-md-4">
+            <div class="insight-tile">
+                <div class="insight-icon category">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="insight-content">
+                    <p class="insight-label">Top Category</p>
+                    <h3 class="insight-value">
+                        {{ top_category }}<br>
+                        <span class="sub-value">₹{{ top_category_amount }}</span>
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions -->
+                    <div class="col-md-4">
+              <div class="insight-tile">
+
+                <!-- Icon -->
+                <div class="insight-icon count">
+                  <i class="fas fa-wallet"></i>
+                </div>
+
+                <!-- Content -->
+                <div class="insight-content">
+                  <p class="insight-label">Monthly Budget</p>
+
+                  <!-- Budget numbers -->
+                  <h3 class="insight-value mb-1">
+                    ₹{{ "%.2f"|format(month_budget) }}
+                  </h3>
+
+                  <p class="sub-value mb-2">
+                    Spent: ₹{{ "%.2f"|format(total_this_month) }}
+                    <br>
+                    Remaining:
+                    <strong
+                      class="{% if left < 0 %}text-danger{% else %}text-success{% endif %}">
+                      ₹{{ "%.2f"|format(left) }}
+                    </strong>
+                  </p>
+
+
+                    {% if month_budget > 0 %}
+
+              {% set percent = (total_this_month / month_budget) * 100 %}
+              {% if percent < 0 %}
+                {% set percent = 0 %}
+              {% elif percent > 100 %}
+                {% set percent = 100 %}
+              {% endif %}
+
+              <div class="progress" style="height: 16px;">
+                <div
+                  class="progress-bar
+                    {% if percent < 70 %}
+                      bg-success
+                    {% elif percent < 90 %}
+                      bg-warning
+                    {% else %}
+                      bg-danger
+                    {% endif %}"
+                  role="progressbar"
+                  style="width: {{ percent }}%;">
+
+                  <!-- Percentage Text -->
+                  <span class="fw-bold text-white small">
+                    {{ percent|round(0) }}%
+                  </span>
+
+                </div>
+              </div>
+
+            {% else %}
+              <p class="text-muted small mt-2">
+                No budget set
+              </p>
+            {% endif %}
+
+
+                </div>
+              </div>
+            </div>
+</div>
+
+<!-- OVESPEND ALERT -->
+{% if overspent and overspend_amount > 0 %}
+  <div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm insight-alert">
+      <div class="card-body d-flex align-items-start gap-3">
+
+        <!-- Icon -->
+        <div class="insight-icon danger">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+
+        <!-- Text -->
+        <div>
+          <p class="mb-1 fw-semibold">
+            You overspent your budget by
+            <span class="text-danger">
+              ₹{{ "%.2f"|format(overspend_amount) }}
+            </span>
+            this month.
+          </p>
+
+          {% if overspend_category %}
+          <p class="mb-0 text-muted small">
+            <strong>{{ overspend_category }}</strong> was the biggest contributor,
+            accounting for {{ overspend_percent|round(0) }}% of your spending.
+          </p>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- TOP 3 + PIE CHART -->
+<div class="row g-4 mb-5">
+  <div class="col-md-6">
+<div class="card border-0 shadow-sm mb-8">
+  <div class="card-body">
+
+    <h6 class="fw-semibold mb-3 text-muted">
+      Top 3 Expenses This Month
+    </h6>
+
+    {% if top_3_expenses %}
+      {% for exp in top_3_expenses %}
+        <div class=" py-2
+                    {% if not loop.last %}border-bottom{% endif %}">
+
+          <!-- Left: Category + Description -->
+          <div class="me-3">
+            <div class="fw-semibold">
+              {{ exp.category }}
+            </div>
+
+            {% if exp.description %}
+  <div class="text-muted small expense-desc" title="Hover to expand">
+    {{ exp.description }}
+  </div>
+{% endif %}
+
+
+            <div class="text-muted small">
+              {{ exp.date.strftime("%d %b %Y") }}
+            </div>
+          </div>
+
+          <!-- Right: Amount -->
+          <div class="fw-bold text-end">
+            ₹{{ "%.2f"|format(exp.amount) }}
+          </div>
+
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted small mb-0">
+        No expenses recorded for this month.
+      </p>
+    {% endif %}
+<h6>if u want more transactions,view in view all transactions</h6>
+  </div>
+</div>
+</div>
+<div class="col-md-6">
+  <div class="card border-0 shadow-sm h-100">
+    <div class="card-body">
+
+     <h6 class="fw-semibold text-muted mb-2">
+  Category Breakdown
+</h6>
+<p class="text-muted small mb-3">
+  Monthly expense distribution.
+</p>
+
+
+      {% if categories and amounts %}
+        <div class="chart-wrapper">
+  <canvas id="categoryPie"></canvas>
+</div>
+
+      {% else %}
+        <p class="text-muted small mb-0">
+          No data available for this month.
+        </p>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- BURN RATE INSIGHT -->
+{% if selected_month == current_month
+      and selected_year == current_year
+      and total_this_month > 0
+      and month_budget > 0 %}
+  <div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body d-flex gap-3 align-items-start">
+
+        <!-- Icon -->
+        <div class="insight-icon
+          {% if diff < 0 %}danger{% else %}success{% endif %}">
+          <i class="fas fa-chart-line"></i>
+        </div>
+
+        <!-- Text -->
+        <div>
+          <p class="mb-1 fw-semibold">
+            {% if diff < 0 %}
+              At your current spending pace, you may exceed your budget by
+              <span class="text-danger">
+                ₹{{ "%.2f"|format(-diff) }}
+              </span>
+              by month-end.
+            {% else %}
+              At your current spending pace, you’re likely to stay within budget
+              with
+              <span class="text-success">
+                ₹{{ "%.2f"|format(diff) }}
+              </span>
+              remaining.
+            {% endif %}
+          </p>
+
+          <p class="text-muted small mb-0">
+            This estimate is based on your average spending so far this month.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+</div>
+</div>
+<!--MONTH VS MONTH-->
+
+
+
+<!-- MONTH COMPARISON -->
+
+<div class="container  pt-4" style="margin-top: 25px; margin-bottom: 25px;">
+
+  <div class="monthly-overview-box">
+
+    <!-- Section Header -->
+    <div class="mb-4">
+      <h3 class="fw-bold mb-1">Monthly Comparison</h3>
+      <p class="text-muted small mb-0">
+        Compare your spending patterns across two different months.
+      </p>
+    </div>
+
+    <!-- Comparison Form -->
+    <form method="GET">
+<!-- Preserve Monthly Overview -->
+<input type="hidden" name="month"
+       value="{{ selected_year }}-{{ '%02d'|format(selected_month) }}">
+
+<!-- Preserve Category Analysis -->
+{%  if cat_selected %}
+<input type="hidden" name="category" value="{{ cat_selected }}">
+{% endif %}
+
+
+{% if cat_year and cat_month %}
+<input type="hidden" name="cat_month"
+       value="{{ cat_year }}-{{ '%02d'|format(cat_month) }}">
+{% endif %}
+
+      <div class="row align-items-end g-3">
+
+        <!-- First Month -->
+        <div class="col-md-4">
+          <label class="form-label small text-muted">
+              {% if selected_m1_month == current_month and selected_m1_year == current_year%}
+            Current Month
+              {% set msg="Current"%}
+              {% elif selected_m1_month == last_month and selected_m1_year == last_month_year %}
+              Last Month
+                            {% set msg="Last"%}
+
+              {%else %}
+              First Month
+                            {% set msg="First"%}
+
+                            {% endif %}
+
+          </label>
+          <input
+            type="month"
+            name="month1"
+            class="form-control"
+            value="{{ selected_m1_year }}-{{ '%02d'|format(selected_m1_month) }}">
+        </div>
+
+        <!-- Second Month -->
+        <div class="col-md-4">
+          <label class="form-label small text-muted">
+              {% if selected_m2_month == current_month and selected_m2_year == current_year%}
+            Current Month
+              {% elif selected_m2_month == last_month and selected_m2_year == last_month_year %}
+              Last Month
+              {%else %}
+            Second Month
+              {% endif %}
+          </label>
+          <input
+            type="month"
+            name="month2"
+            class="form-control"
+            value="{{ selected_m2_year }}-{{ '%02d'|format(selected_m2_month) }}">
+        </div>
+
+        <!-- Action -->
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-dark w-100">
+            Compare
+          </button>
+        </div>
+
+      </div>
+
+    </form>
+<p class="text-muted small mt-2">
+  <i class="fas fa-info-circle me-1"></i>
+    ALL Comparisons are shown relative to the <strong>{{msg}} month</strong>.
+</p>
+      {% if comparison_possible %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="fw-bold">Overall Spend Change</h5>
+    <h3 class="{{ spend_class }}">
+      {{ spend_icon }} {{ spend_text }}
+    </h3>
+    <p class="text-muted small">
+      Month 1: ₹{{ m1_total }} → Month 2: ₹{{ m2_total }}
+    </p>
+  </div>
+</div>
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h5 class="fw-bold mb-2">Category-wise Comparison</h5>
+    <p class="text-muted small">
+      Compare spending across categories for both months.
+    </p>
+
+    <canvas id="categoryBarChart"></canvas>
+  </div>
+</div>
+{% if increase_text %}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body d-flex align-items-start gap-3">
+
+    <div class="insight-icon danger">
+      <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <div>
+      <p class="fw-semibold mb-1">Highest Increase</p>
+      <p class="text-danger mb-0">
+        {{ increase_text }}
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endif %}
+{% if decrease_text %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body d-flex align-items-start gap-3">
+
+    <div class="insight-icon success">
+      <i class="fas fa-arrow-down"></i>
+    </div>
+
+    <div>
+      <p class="fw-semibold mb-1">Highest Decrease</p>
+      <p class="text-success mb-0">
+        {{ decrease_text }}
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endif %}
+{% else %}
+
+
+  <div class="card-body d-flex gap-3 align-items-start">
+
+    <div class="insight-icon danger">
+      <i class="fas fa-ban fa-lg"></i>
+    </div>
+
+    <div>
+      <p class="fw-semibold mb-1">Comparison Not Available</p>
+      <p class="text-muted mb-0">
+        There is no expense data for one or both selected months,
+        so a comparison cannot be generated.
+      </p>
+    </div>
+
+  </div>
+
+ {% endif %}
+  </div>
+
+</div><!--     LAST DIV -->
+
+<!--CATEGORY ANALYSIS-->
+
+<div class="container  pt-4" style="margin-top: 25px; margin-bottom: 25px;">
+
+  <div class="monthly-overview-box">
+<h3 class="fw-bold mb-1">Category Analysis</h3>
+  <p class="text-muted small">
+    Analysis is based on the selected month and the previous 5 months.
+  </p>
+
+  <form method="GET" class="row g-3 align-items-end mb-4">
+
+    <!-- Preserve upper state -->
+    <input type="hidden" name="month"
+           value="{{ selected_year }}-{{ '%02d'|format(selected_month) }}">
+    <input type="hidden" name="month1"
+           value="{{ selected_m1_year }}-{{ '%02d'|format(selected_m1_month) }}">
+    <input type="hidden" name="month2"
+           value="{{ selected_m2_year }}-{{ '%02d'|format(selected_m2_month) }}">
+
+    <div class="col-md-3">
+      <label class="form-label small text-muted">Select Month</label>
+      <input type="month" name="cat_month" class="form-control"
+             value="{{ cat_year }}-{{ '%02d'|format(cat_month) }}">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label small text-muted">Select Category</label>
+      <select name="category" class="form-select" required>
+        <option value="">Choose category</option>
+        {% for c in all_categories %}
+          <option value="{{ c }}"
+            {% if c == cat_selected %}selected{% endif %}>
+            {{ c }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <button class="btn btn-dark w-100">Analyze</button>
+    </div>
+
+  </form>
+
+
+
+      {% if not cat_selected %}
+  <p class="text-muted small">Select a category to view analysis.</p>
+{% elif consistency_count == 0 %}
+  <p class="text-muted small">
+    Not enough data available for this category in the selected period.
+  </p>
+{% else %}
+
+
+      <canvas id="categoryTrendChart"></canvas>
+<div class="row mt-4 g-3">
+
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <p class="fw-semibold mb-1">Peak Month</p>
+        <p class="mb-0">
+          {{ peak_month[1] }}/{{ peak_month[0] }} — ₹{{ peak_value }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <p class="fw-semibold mb-1">Consistency</p>
+        <p class="mb-0">
+          Appeared in {{ consistency_count }} of 6 months
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <p class="fw-semibold mb-1">Category Rank</p>
+        <p class="mb-0">
+          Ranked #{{ rank }} among all categories
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endif %}
+</div>
+
+
+</div><!--     LAST DIV -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const trendData = {{ category_trend | tojson }};
+const labels = {{ months_window | map(attribute=1) | list | tojson }};
+
+new Chart(document.getElementById("categoryTrendChart"), {
+  type: "line",
+  data: {
+    labels: labels,
+    datasets: [{
+      label: "{{ cat_selected }} trend",
+      data: trendData,
+      borderWidth: 2,
+      tension: 0.3
+    }]
+  }
+});
+</script>
+
+
+
+
+{% if categories and amounts %}
+<script>
+  const categories = {{ categories | tojson }};
+  const amounts = {{ amounts | tojson }};
+  const totalBudget = {{ total_budget or 0 }};
+
+  if (amounts.length > 0) {
+    const totalSpent = amounts.reduce((a, b) => a + b, 0);
+
+    new Chart(document.getElementById('categoryPie'), {
+  type: 'pie',
+  data: {
+    labels: categories,
+    datasets: [{
+      data: amounts,
+      backgroundColor: [
+        '#4CAF50', '#FFC107', '#FF5722',
+        '#03A9F4', '#9C27B0', '#607D8B'
+      ]
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            const value = ctx.raw;
+            const percent = totalSpent
+              ? ((value / totalSpent) * 100).toFixed(1)
+              : 0;
+            const budgetPercent = totalBudget
+              ? ((value / totalBudget) * 100).toFixed(1)
+              : 0;
+
+            return `₹${value} (${percent}% of spend)`;
+          }
+        }
+      }
+    }
+  }
+});
+
+  }
+</script>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const mvCategories = {{ mv_categories | tojson | safe }};
+  const mvMonth1Data = {{ mv_month1_amounts | tojson | safe }};
+  const mvMonth2Data = {{ mv_month2_amounts | tojson | safe }};
+
+  if (mvCategories.length > 0) {
+    new Chart(document.getElementById('categoryBarChart'), {
+      type: 'bar',
+      data: {
+        labels: mvCategories,
+        datasets: [
+          {
+            label: 'Month 1',
+            data: mvMonth1Data,
+            backgroundColor: '#6c757d'
+          },
+          {
+            label: 'Month 2',
+            data: mvMonth2Data,
+            backgroundColor: '#0d6efd'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: v => '₹' + v
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+
+
+{% include "footer.html" %}

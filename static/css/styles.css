@@ -11520,3 +11520,42 @@ section#contact form#contactForm :-ms-input-placeholder {
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
     background-color : #b8f5ed
 }
+.expense-desc {
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;        /* number of lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.expense-desc:hover {
+  -webkit-line-clamp: unset;
+  white-space: normal;
+}
+.chart-wrapper {
+  max-width: 320px;
+  max-height: 320px;
+  margin: 0 auto; /* center inside card */
+}
+
+.chart-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.monthly-overview-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  margin-top : 25
+  margin-bottom:25
+}
+
+.monthly-overview-box:hover {
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
